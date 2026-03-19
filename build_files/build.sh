@@ -10,13 +10,12 @@ set -ouex pipefail
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
 
 # this installs a package from fedora repos
-dnf5 -y remove                  \
-    gnome-shell                 \
-    gnome-session               \
-    mutter
+dnf5 -y remove plasma-workspace plasma-* kde-*
 
 # setup niri
 dnf5 -y install \
+    gdm \
+    nautilus \
     niri \
     foot \
     mako \
@@ -26,10 +25,8 @@ dnf5 -y install \
     xwayland-satellite \
     xdg-desktop-portal-gtk \
     xdg-desktop-portal-gnome \
-    polkit-kde \
     gnome-keyring \
-    nautilus \
-    gdm
+    polkit-kde
 
 # Use a COPR Example:
 #
@@ -41,5 +38,6 @@ dnf5 -y install \
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
+systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service polkit-agent.service
 

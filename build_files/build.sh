@@ -9,24 +9,15 @@ set -ouex pipefail
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
 
-# this installs a package from fedora repos
-dnf5 -y remove plasma-workspace plasma-* kde-*
-
 # setup niri
 dnf5 -y install \
-    gdm \
-    nautilus \
     niri \
     foot \
     mako \
     fuzzel \
     waybar \
     swaybg \
-    xwayland-satellite \
-    xdg-desktop-portal-gtk \
-    xdg-desktop-portal-gnome \
-    gnome-keyring \
-    polkit-kde
+    xwayland-satellite
 
 # Use a COPR Example:
 #
@@ -39,5 +30,4 @@ dnf5 -y install \
 
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
-systemctl --global add-wants niri.service plasma-polkit-agent.service
 

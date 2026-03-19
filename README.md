@@ -1,3 +1,5 @@
+First of all, I should have just forked this repo https://github.com/gabeklavans/bazzite-niri and made changes to it.
+
 # image-template
 
 This repository is meant to be a template for building your own custom [bootc](https://github.com/bootc-dev/bootc) image. This template is the recommended way to make customizations to any image published by the Universal Blue Project.
@@ -262,3 +264,4 @@ These are images derived from this template (or similar enough to this template)
 - [Homer](https://github.com/bketelsen/homer/)
 - [Amy OS](https://github.com/astrovm/amyos)
 - [VeneOS](https://github.com/Venefilyn/veneos)
+

@@ -1,5 +1,5 @@
 [Unit]
-Description=PolicyKit Authentication Agent
+Description=KDE PolicyKit Authentication Agent
 PartOf=graphical-session.target
 After=graphical-session.target
 

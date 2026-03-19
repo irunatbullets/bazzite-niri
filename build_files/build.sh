@@ -16,21 +16,19 @@ dnf5 -y remove                  \
     mutter
 
 # setup niri
-dnf5 -y install                 \
-    niri                        \
-    foot                        \
-    mako                        \
-    fuzzel                      \
-    waybar                      \
-    swaybg                      \
-    # swayidle                  \
-    # swaylock                  \
-    xwayland-satellite          \
-    xdg-desktop-portal-gtk      \
-    xdg-desktop-portal-gnome    \
-    polkit-kde                  \
-    gnome-keyring               \
-    nautilus                    \
+dnf5 -y install \
+    niri \
+    foot \
+    mako \
+    fuzzel \
+    waybar \
+    swaybg \
+    xwayland-satellite \
+    xdg-desktop-portal-gtk \
+    xdg-desktop-portal-gnome \
+    polkit-kde \
+    gnome-keyring \
+    nautilus \
     gdm
 
 # Use a COPR Example:

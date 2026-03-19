@@ -23,14 +23,15 @@ dnf5 -y install                 \
     fuzzel                      \
     waybar                      \
     swaybg                      \
-    swayidle                    \
-    swaylock                    \
+    # swayidle                  \
+    # swaylock                  \
     xwayland-satellite          \
     xdg-desktop-portal-gtk      \
     xdg-desktop-portal-gnome    \
+    polkit-kde                  \
     gnome-keyring               \
     nautilus                    \
-    polkit-gnome
+    gdm
 
 # Use a COPR Example:
 #
@@ -42,4 +43,5 @@ dnf5 -y install                 \
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
+systemctl --global add-wants niri.service polkit-agent.service
 

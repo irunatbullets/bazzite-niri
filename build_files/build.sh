@@ -11,18 +11,19 @@ set -ouex pipefail
 
 # setup niri
 dnf5 -y install \
-    niri \
     alacritty \
-    mako \
-    fuzzel \
-    waybar \
-    swaybg \
-    xwayland-satellite \
-    rust \
     cargo \
     dbus-devel \
-    pkgconf-pkg-config
-
+    fuzzel \
+    mako \
+    niri \
+    pkgconf-pkg-config \
+    rust \
+    swaybg \
+    waybar \
+    wiremix \
+    xwayland-satellite 
+    
 export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
 export CARGO_INSTALL_ROOT=/usr

@@ -12,12 +12,23 @@ set -ouex pipefail
 # setup niri
 dnf5 -y install \
     niri \
-    foot \
+    alacritty \
     mako \
     fuzzel \
     waybar \
     swaybg \
-    xwayland-satellite
+    xwayland-satellite \
+    rust \
+    cargo \
+    dbus-devel \
+    pkgconf-pkg-config
+
+export CARGO_HOME=/tmp/cargo
+export RUSTUP_HOME=/tmp/rustup
+export CARGO_INSTALL_ROOT=/usr
+
+cargo install bluetui
+cargo install wifitui
 
 # Use a COPR Example:
 #

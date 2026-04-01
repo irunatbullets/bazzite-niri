@@ -12,6 +12,7 @@ set -ouex pipefail
 # setup niri
 dnf5 -y install \
     alacritty \
+    at-spi2-core \
     cargo \
     dbus-devel \
     fuzzel \
@@ -22,8 +23,8 @@ dnf5 -y install \
     swaybg \
     waybar \
     wiremix \
-    xwayland-satellite 
-    
+    xwayland-satellite
+
 export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
 export CARGO_INSTALL_ROOT=/usr
@@ -42,4 +43,10 @@ cargo install wifitui
 
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
+
+mkdir -p /etc/profile.d
+cat <<'EOF' > /etc/profile.d/steam_a11y_fix.sh
+export STEAM_ENABLE_A11Y=0
+EOF
+chmod +x /etc/profile.d/steam_a11y_fix.sh
 

@@ -21,6 +21,7 @@ dnf5 -y install \
     pkgconf-pkg-config \
     rust \
     swaybg \
+    swayidle \
     waybar \
     wiremix \
     xwayland-satellite

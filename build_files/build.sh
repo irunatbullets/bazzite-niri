@@ -21,6 +21,7 @@ dnf5 -y install \
     fuzzel \
     gnome-keyring \
     lxqt-policykit \
+    ly \
     mako \
     nautilus \
     niri \

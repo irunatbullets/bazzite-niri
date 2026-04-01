@@ -1,0 +1,11 @@
+[Unit]
+Description=LXQt PolicyKit Authentication Agent
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/lxqt-policykit-agent
+Slice=background.slice
+Restart=on-failure
+TimeoutStopSec=5sec
+

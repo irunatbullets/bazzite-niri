@@ -10,7 +10,8 @@ set -ouex pipefail
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
 
 # remove kde plasma
-dnf5 -y remove plasma-workspace plasma-* kde-*
+dnf5 -y remove plasma-workspace plasma-* kde-* sddm
+dnf5 -y autoremove
 
 # setup niri
 dnf5 -y install \
@@ -19,11 +20,11 @@ dnf5 -y install \
     dbus-devel \
     fuzzel \
     gnome-keyring \
+    lxqt-policykit \
     mako \
     nautilus \
     niri \
     pkgconf-pkg-config \
-    polkit-kde \
     rust \
     swaybg \
     swayidle \
@@ -52,5 +53,5 @@ cargo install wifitui
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
-systemctl --global add-wants niri.service plasma-polkit-agent.service
+systemctl --global add-wants niri.service lxqt-polkit-agent.service
 

@@ -9,21 +9,28 @@ set -ouex pipefail
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
 
+# remove kde plasma
+dnf5 -y remove plasma-workspace plasma-* kde-*
+
 # setup niri
 dnf5 -y install \
     alacritty \
-    at-spi2-core \
     cargo \
     dbus-devel \
     fuzzel \
+    gnome-keyring \
     mako \
+    nautilus \
     niri \
     pkgconf-pkg-config \
+    polkit-kde \
     rust \
     swaybg \
     swayidle \
     waybar \
     wiremix \
+    xdg-desktop-portal-gnome \
+    xdg-desktop-portal-gtk \
     xwayland-satellite
 
 export CARGO_HOME=/tmp/cargo
@@ -44,10 +51,6 @@ cargo install wifitui
 
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
-
-mkdir -p /etc/profile.d
-cat <<'EOF' > /etc/profile.d/steam_a11y_fix.sh
-export STEAM_ENABLE_A11Y=0
-EOF
-chmod +x /etc/profile.d/steam_a11y_fix.sh
+systemctl --global add-wants niri.service swayidle.service
+systemctl --global add-wants niri.service plasma-polkit-agent.service
 

@@ -13,34 +13,36 @@ set -ouex pipefail
 dnf5 -y remove plasma-workspace plasma-* kde-* sddm
 dnf5 -y autoremove
 
-# setup niri
+# setup niri "important software"
 dnf5 -y install \
-    alacritty \
-    cargo \
-    dbus-devel \
-    fuzzel \
     gnome-keyring \
-    lxqt-policykit \
-    ly \
+    xfce-polkit \
     mako \
     nautilus \
-    niri \
-    pkgconf-pkg-config \
-    rust \
-    swaybg \
-    swayidle \
-    waybar \
-    wiremix \
     xdg-desktop-portal-gnome \
     xdg-desktop-portal-gtk \
     xwayland-satellite
 
-export CARGO_HOME=/tmp/cargo
-export RUSTUP_HOME=/tmp/rustup
-export CARGO_INSTALL_ROOT=/usr
+# setup niri
+dnf5 -y install \
+    alacritty \
+    fuzzel \
+    niri \
+    swaybg \
+    swayidle \
+    swaylock \
+    waybar
 
-cargo install bluetui
-cargo install wifitui
+# install desktop manager
+dnf5 -y install \
+    ly
+
+# install rust and dependencies
+dnf5 -y install \
+    rust \
+    cargo \
+    dbus-devel \
+    pkgconf-pkg-config
 
 # Use a COPR Example:
 #
@@ -54,5 +56,5 @@ cargo install wifitui
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
-systemctl --global add-wants niri.service lxqt-polkit-agent.service
+systemctl --global add-wants niri.service xfce-polkit.service
 

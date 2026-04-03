@@ -16,6 +16,7 @@ FROM ghcr.io/ublue-os/bazzite:stable
 
 # Copy your service files
 COPY services /usr/lib/systemd/user/
+COPY greetd /etc/greetd/
 
 ### [IM]MUTABLE /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to

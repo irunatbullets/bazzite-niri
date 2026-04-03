@@ -72,7 +72,7 @@ CONFIG_GREETD="/etc/greetd/config.toml"
 BACKUP_GREETD="/etc/greetd/config.toml.bak"
 
 if [ -f "$CONFIG_GREETD" ]; then
-    sudo cp "$CONFIG_GREETD" "$BACKUP_GREETD"
+    cp "$CONFIG_GREETD" "$BACKUP_GREETD"
 else
     mkdir -p "/etc/greetd"
 fi
@@ -86,9 +86,9 @@ command = "tuigreet --remember --cmd niri-session"
 user = "greetd"
 EOF
 
-sudo mkdir -p /var/cache/tuigreet
-sudo chown greetd:greetd /var/cache/tuigreet
-sudo chmod 0755 /var/cache/tuigreet
+mkdir -p /var/cache/tuigreet
+chown greetd:greetd /var/cache/tuigreet
+chmod 0755 /var/cache/tuigreet
 
 # Build gtklock from source
 dnf5 -y install \

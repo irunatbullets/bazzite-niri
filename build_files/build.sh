@@ -38,8 +38,8 @@ dnf5 -y install \
 # Setup niri "important software"
 dnf5 -y install \
     gnome-keyring \
-    xfce-polkit \
     mako \
+    mate-polkit \
     nautilus \
     xdg-desktop-portal-gnome \
     xdg-desktop-portal-gtk \
@@ -99,5 +99,4 @@ rm -rf /tmp/gtklock
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
-systemctl --global add-wants niri.service xfce-polkit.service
 

@@ -12,28 +12,8 @@ set -ouex pipefail
 # Remove kde plasma
 dnf5 -y remove plasma-workspace plasma-* kde-* sddm
 
-# Remove existing bazzite pipewire stuff
-dnf5 versionlock delete \
-    pipewire \
-    pipewire-alsa \
-    pipewire-gstreamer \
-    pipewire-jack-audio-connection-kit \
-    pipewire-jack-audio-connection-kit-libs \
-    pipewire-libs \
-    pipewire-plugin-libcamera \
-    pipewire-pulseaudio \
-    pipewire-utils \
-    wireplumber \
-    wireplumber-libs
-
 # Tidy up!
 dnf5 -y autoremove
-
-# Install pipewire
-dnf5 -y install \
-    pipewire \
-    pipewire-libs \
-    pipewire-devel
 
 # Setup niri "important software"
 dnf5 -y install \
@@ -111,6 +91,10 @@ ninja -C build install
 
 cd /
 rm -rf /tmp/gtklock
+
+# Instead of battling cargo dependencies post install, I'm sneaking this in
+dnf5 -y install \
+    wiremix
 
 # Use a COPR Example:
 #

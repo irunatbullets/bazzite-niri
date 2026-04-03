@@ -32,7 +32,6 @@ dnf5 -y install \
     niri \
     swaybg \
     swayidle \
-    swaylock \
     waybar
 
 # Install rust, cargo and various dependencies

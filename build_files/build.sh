@@ -44,32 +44,6 @@ dnf5 -y install \
     dbus-devel \
     pkgconf-pkg-config
 
-# Setup tuigreet
-dnf5 -y install \
-    tuigreet
-
-CONFIG_GREETD="/etc/greetd/config.toml"
-BACKUP_GREETD="/etc/greetd/config.toml.bak"
-
-if [ -f "$CONFIG_GREETD" ]; then
-    cp "$CONFIG_GREETD" "$BACKUP_GREETD"
-else
-    mkdir -p "/etc/greetd"
-fi
-
-tee "$CONFIG_GREETD" > /dev/null <<EOF
-[terminal]
-vt = 7
-
-[default_session]
-command = "tuigreet --remember --cmd niri-session"
-user = "greetd"
-EOF
-
-mkdir -p /var/cache/tuigreet
-chown greetd:greetd /var/cache/tuigreet
-chmod 0755 /var/cache/tuigreet
-
 # Build gtklock from source
 dnf5 -y install \
     meson \

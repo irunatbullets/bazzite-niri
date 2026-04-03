@@ -39,11 +39,8 @@ dnf5 -y install \
     greetd \
     tuigreet
 
-useradd -M -G video greeter
-chmod -R go+r /etc/greetd/
-
 mkdir -p /var/cache/tuigreet
-chown greeter:greeter /var/cache/tuigreet
+chown greetd:greetd /var/cache/tuigreet
 chmod 0755 /var/cache/tuigreet
 
 # Install rust, cargo and various dependencies

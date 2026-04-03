@@ -34,15 +34,6 @@ dnf5 -y install \
     swayidle \
     waybar
 
-# Setup tuigreet
-dnf5 -y install \
-    greetd \
-    tuigreet
-
-mkdir -p /var/cache/tuigreet
-chown greetd:greetd /var/cache/tuigreet
-chmod 0755 /var/cache/tuigreet
-
 # Install rust, cargo and various dependencies
 dnf5 -y install \
     rust \
@@ -88,7 +79,6 @@ dnf5 -y install \
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
-systemctl enable greetd
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
 systemctl --global add-wants niri.service xfce-polkit.service

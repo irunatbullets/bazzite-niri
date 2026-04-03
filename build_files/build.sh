@@ -19,7 +19,7 @@ dnf5 -y autoremove
 dnf5 -y install \
     gnome-keyring \
     mako \
-    mate-polkit \
+    xfce-polkit \
     nautilus \
     xdg-desktop-portal-gnome \
     xdg-desktop-portal-gtk \
@@ -82,5 +82,5 @@ dnf5 -y install \
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
-systemctl enable greetd
+systemctl --global add-wants niri.service xfce-polkit.service
 

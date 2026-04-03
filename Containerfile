@@ -17,10 +17,6 @@ FROM ghcr.io/ublue-os/bazzite:stable
 # Copy your service files
 COPY services /usr/lib/systemd/user/
 
-# Create the .wants directory and symlink correctly
-RUN mkdir -p /etc/systemd/user/niri.service.wants \
- && ln -s /usr/lib/systemd/user/mate-polkit.service /etc/systemd/user/niri.service.wants/
-
 ### [IM]MUTABLE /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
 ## make it mutable/writable for users. However, some packages write files to this directory,

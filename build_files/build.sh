@@ -59,11 +59,36 @@ dnf5 -y install \
 dnf5 -y install \
     rust \
     cargo \
+    clang \
+    clang-devel \
     dbus-devel \
     pkgconf-pkg-config
 
+# Setup tuigreet
 dnf5 -y install \
     tuigreet
+
+CONFIG_GREETD="/etc/greetd/config.toml"
+BACKUP_GREETD="/etc/greetd/config.toml.bak"
+
+if [ -f "$CONFIG_GREETD" ]; then
+    sudo cp "$CONFIG_GREETD" "$BACKUP_GREETD"
+else
+    mkdir -p "/etc/greetd"
+fi
+
+tee "$CONFIG_GREETD" > /dev/null <<EOF
+[terminal]
+vt = 7
+
+[default_session]
+command = "tuigreet --remember --cmd niri-session"
+user = "greetd"
+EOF
+
+sudo mkdir -p /var/cache/tuigreet
+sudo chown greetd:greetd /var/cache/tuigreet
+sudo chmod 0755 /var/cache/tuigreet
 
 # Build gtklock from source
 dnf5 -y install \
@@ -99,4 +124,5 @@ rm -rf /tmp/gtklock
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
+systemctl enable greetd
 

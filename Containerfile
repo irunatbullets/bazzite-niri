@@ -14,7 +14,12 @@ FROM ghcr.io/ublue-os/bazzite:stable
 # Fedora base image: quay.io/fedora/fedora-bootc:41
 # CentOS base images: quay.io/centos-bootc/centos-bootc:stream10
 
+# Copy your service files
 COPY services /usr/lib/systemd/user/
+
+# Create the .wants directory and symlink correctly
+RUN mkdir -p /etc/systemd/user/niri.service.wants \
+ && ln -s /usr/lib/systemd/user/mate-polkit.service /etc/systemd/user/niri.service.wants/
 
 ### [IM]MUTABLE /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
@@ -36,6 +41,8 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/log \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh
+
+RUN rm -rf /run/* /tmp/*
 
 ### LINTING
 ## Verify final image and contents are correct.

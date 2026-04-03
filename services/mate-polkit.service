@@ -1,0 +1,13 @@
+[Unit]
+Description=Mate PolicyKit Authentication Agent
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/libexec/polkit-mate-authentication-agent-1
+Restart=on-failure
+Slice=background.slice
+
+[Install]
+WantedBy=default.target
+

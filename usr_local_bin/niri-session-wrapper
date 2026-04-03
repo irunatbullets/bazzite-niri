@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Force correct HOME from passwd
+export HOME="$(getent passwd "$USER" | cut -d: -f6)"
+
+# Optional but nice
+export XDG_SESSION_TYPE=wayland
+
+exec dbus-run-session niri-session
+

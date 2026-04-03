@@ -16,7 +16,7 @@ FROM ghcr.io/ublue-os/bazzite:stable
 
 # Copy your service files
 COPY services /usr/lib/systemd/user/
-COPY greetd /etc/greetd/
+COPY usr_local_bin /usr/local/bin/
 
 ### [IM]MUTABLE /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
@@ -38,6 +38,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/log \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh
+
+# Add greetd config
+COPY greetd /etc/greetd/
 
 ### LINTING
 ## Verify final image and contents are correct.

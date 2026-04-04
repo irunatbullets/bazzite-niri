@@ -97,10 +97,14 @@ ninja -C build install
 cd /
 rm -rf /tmp/gtklock
 
-# Install a couple of tuis
+# Install a couple of tuis (from dnf and cargo)
 dnf5 -y install \
     htop \
     wiremix
+    
+export CARGO_HOME=/tmp/cargo
+export RUSTUP_HOME=/tmp/rustup
+export CARGO_INSTALL_ROOT=/usr
 
 cargo install wifitui
 cargo install bluetui

@@ -34,27 +34,7 @@ dnf5 -y install \
     swayidle \
     waybar
 
-# Install rust, cargo and various dependencies
-dnf5 -y install \
-    rust \
-    cargo \
-    clang \
-    clang-devel \
-    dbus-devel \
-    pkgconf-pkg-config
-
-# Build gtklock from source
-dnf5 -y install \
-    meson \
-    ninja \
-    gcc \
-    gtk3-devel \
-    pam-devel \
-    wayland-devel \
-    wayland-protocols-devel \
-    gobject-introspection-devel \
-    vala
-
+# Install tuigreet
 dnf5 -y install \
     greetd \
     tuigreet
@@ -87,6 +67,18 @@ EOF
 
 install -d -o greetd -g greetd -m 0755 /var/cache/tuigreet
 
+# Build gtklock from source
+dnf5 -y install \
+    meson \
+    ninja \
+    gcc \
+    gtk3-devel \
+    pam-devel \
+    wayland-devel \
+    wayland-protocols-devel \
+    gobject-introspection-devel \
+    vala
+
 git clone https://github.com/jovanlanik/gtklock.git /tmp/gtklock
 cd /tmp/gtklock
 
@@ -97,10 +89,19 @@ ninja -C build install
 cd /
 rm -rf /tmp/gtklock
 
-# Install a couple of tuis (from dnf and cargo)
+# Install a couple of tuis
 dnf5 -y install \
     htop \
     wiremix
+
+# Install rust, cargo and various dependencies
+dnf5 -y install \
+    rust \
+    cargo \
+    clang \
+    clang-devel \
+    dbus-devel \
+    pkgconf-pkg-config
     
 export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
@@ -108,6 +109,15 @@ export CARGO_INSTALL_ROOT=/usr
 
 cargo install wifitui
 cargo install bluetui
+
+rm -rf /tmp/cargo /tmp/rustup
+dnf5 -y remove \
+    rust \
+    cargo \
+    clang \
+    clang-devel \
+    dbus-devel \
+    pkgconf-pkg-config
 
 # Use a COPR Example:
 #

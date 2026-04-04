@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ouex pipefail
+set -euxo pipefail
 
 ### Install packages
 
@@ -55,6 +55,38 @@ dnf5 -y install \
     gobject-introspection-devel \
     vala
 
+dnf5 -y install \
+    greetd \
+    tuigreet
+
+START_NIRI="/usr/local/bin/start-niri"
+
+if [ -L /usr/local ] || [ -e /usr/local ] && [ ! -d /usr/local ]; then
+    rm -rf /usr/local
+fi
+
+install -d /usr/local/bin
+
+install -Dm755 /dev/stdin "$START_NIRI" <<'EOF'
+#!/usr/bin/env bash
+
+cd "$HOME" || exit 1
+
+exec niri-session
+EOF
+
+CONFIG_GREETD="/etc/greetd/config.toml"
+install -Dm644 /dev/stdin "$CONFIG_GREETD" <<EOF
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --remember --cmd /usr/local/bin/start-niri"
+user = "greetd"
+EOF
+
+install -d -o greetd -g greetd -m 0755 /var/cache/tuigreet
+
 git clone https://github.com/jovanlanik/gtklock.git /tmp/gtklock
 cd /tmp/gtklock
 
@@ -79,6 +111,7 @@ dnf5 -y install \
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
+systemctl enable greetd
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
 systemctl --global add-wants niri.service xfce-polkit.service

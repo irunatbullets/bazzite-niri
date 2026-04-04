@@ -120,7 +120,7 @@ dnf5 -y remove \
     clang-devel \
     dbus-devel
 
-dnf5 -y install \
+dnf5 -y remove \
     meson \
     ninja \
     gcc \

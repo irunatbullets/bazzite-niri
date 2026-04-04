@@ -111,13 +111,25 @@ cargo install wifitui
 cargo install bluetui
 
 rm -rf /tmp/cargo /tmp/rustup
+
+# Rmove rust build dependencies (except pkgconf-pkg-config)
 dnf5 -y remove \
     rust \
     cargo \
     clang \
     clang-devel \
-    dbus-devel \
-    pkgconf-pkg-config
+    dbus-devel
+
+dnf5 -y install \
+    meson \
+    ninja \
+    gcc \
+    gtk3-devel \
+    pam-devel \
+    wayland-devel \
+    wayland-protocols-devel \
+    gobject-introspection-devel \
+    vala
 
 # Use a COPR Example:
 #

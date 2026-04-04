@@ -102,13 +102,23 @@ dnf5 -y install \
     clang-devel \
     dbus-devel \
     pkgconf-pkg-config
-    
+
 export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
 export CARGO_INSTALL_ROOT=/usr
 
 cargo install wifitui
 cargo install bluetui
+
+install -Dm644 /dev/stdin /etc/polkit-1/rules.d/49-wifitui.rules <<'EOF'
+polkit.addRule(function(action, subject) {
+    // Allow all users in the 'wheel' group to scan Wi-Fi
+    if (action.id == "org.freedesktop.NetworkManager.wifi.scan" &&
+        subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});
+EOF
 
 rm -rf /tmp/cargo /tmp/rustup
 

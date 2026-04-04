@@ -97,9 +97,13 @@ ninja -C build install
 cd /
 rm -rf /tmp/gtklock
 
-# Instead of battling cargo dependencies post install, I'm sneaking this in
+# Install a couple of tuis
 dnf5 -y install \
+    htop \
     wiremix
+
+cargo install wifitui
+cargo install bluetui
 
 # Use a COPR Example:
 #

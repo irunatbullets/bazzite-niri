@@ -23,7 +23,7 @@ dnf5 -y install         \
     bluetui             \
     impala              \
     wiremix
-dnf5 -y copr disable gierth/tools/rust
+dnf5 -y copr disable gierth/tools-rust
 
 ### System Unit Files
 

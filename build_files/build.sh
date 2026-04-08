@@ -3,7 +3,6 @@
 set -euxo pipefail
 
 ### Install packages
-
 dnf5 -y install         \
     alacritty           \
     fuzzel              \
@@ -17,13 +16,24 @@ dnf5 -y install         \
     xfce-polkit         \
     xwayland-satellite
 
-### Copr installs
+### Build fresh copies of wifitui and bluetui
+dnf5 -y install rust cargo @development-tools dbus-devel
+(
+    export CARGO_HOME=/tmp/cargo
+    export RUSTUP_HOME=/tmp/rustup
+    export CARGO_INSTALL_ROOT=/usr
 
-dnf5 -y copr enable binarypie/hypercube
-dnf5 -y install         \
-    bluetui             \
-    wifitui
-dnf5 -y copr disable binarypie/hypercube
+    cargo install wifitui bluetui
+)
+
+###  Clean up build artifacts and dev packages
+rm -rf /tmp/cargo /tmp/rustup
+dnf5 -y remove rust cargo @development-tools dbus-devel
+
+### Copr example (because I will probably forget how this works)
+#dnf5 -y copr enable blah/blah
+#dnf5 -y install blah
+#dnf5 -y copr disable blah/blah
 
 ### System Unit Files
 

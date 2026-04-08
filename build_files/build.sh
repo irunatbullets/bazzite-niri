@@ -13,17 +13,17 @@ dnf5 -y install         \
     swaybg              \
     swayidle            \
     waybar              \
+    wiremix             \
     xfce-polkit         \
     xwayland-satellite
 
 ### Copr installs
 
-dnf5 -y copr enable gierth/tools-rust
+dnf5 -y copr enable binarypie/hypercube
 dnf5 -y install         \
     bluetui             \
-    impala              \
-    wiremix
-dnf5 -y copr disable gierth/tools-rust
+    wifitui
+dnf5 -y copr disable binarypie/hypercube
 
 ### System Unit Files
 

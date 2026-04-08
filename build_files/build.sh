@@ -12,6 +12,7 @@ set -euxo pipefail
 # Setup niri "important software" not already covered by gnome.
 dnf5 -y install \
     mako \
+    mate-polkit \
     xwayland-satellite
 
 # Setup niri

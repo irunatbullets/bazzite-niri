@@ -30,10 +30,10 @@ dnf5 -y install rust cargo @development-tools dbus-devel
 rm -rf /tmp/cargo /tmp/rustup
 dnf5 -y remove rust cargo @development-tools dbus-devel
 
-### Copr example (because I will probably forget how this works)
-#dnf5 -y copr enable blah/blah
-#dnf5 -y install blah
-#dnf5 -y copr disable blah/blah
+### Copr install
+dnf5 -y copr enable mochaa/gtklock
+dnf5 -y install gtklock
+dnf5 -y copr disable mochaa/gtklock
 
 ### System Unit Files
 

@@ -20,6 +20,7 @@ dnf5 -y install         \
     niri                \
     swaybg              \
     swayidle            \
+    swaylock            \
     waybar              \
     wiremix             \
     xfce-polkit
@@ -51,10 +52,10 @@ dnf5 -y install rust cargo @development-tools dbus-devel xcb-util-cursor-devel c
 rm -rf /tmp/cargo /tmp/rustup /tmp/xwayland-satellite
 dnf5 -y remove rust cargo @development-tools dbus-devel xcb-util-cursor-devel clang git
 
-### Copr install
-dnf5 -y copr enable mochaa/gtklock
-dnf5 -y install gtklock
-dnf5 -y copr disable mochaa/gtklock
+### Copr install example (in case I forget)
+#dnf5 -y copr enable blah/blah
+#dnf5 -y install blah
+#dnf5 -y copr disable blah/blah
 
 ### System Unit Files
 

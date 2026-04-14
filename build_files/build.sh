@@ -25,6 +25,7 @@ dnf5 -y install         \
     swaylock            \
     waybar              \
     wiremix             \
+    wlogout             \
     xfce-polkit
 
 ### Build fresh copies of wifitui, bluetui, and xwayland-satellite

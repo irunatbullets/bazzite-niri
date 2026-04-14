@@ -15,10 +15,12 @@ set -euxo pipefail
 dnf5 -y install         \
     alacritty           \
     fuzzel              \
+    grim                \
     htop                \
     mako                \
     niri                \
     swaybg              \
+    slurp               \
     swayidle            \
     swaylock            \
     waybar              \

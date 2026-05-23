@@ -84,8 +84,16 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
 
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push To GHCR
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request'
         uses: redhat-actions/push-to-registry@v2
         id: push
         with:
@@ -96,28 +104,25 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v4.1.2
         with:
           cosign-release: v2.6.1
 
-      - name: Sign container image (keyless, digest-based)
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      - name: Cosign login to GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Sign container image
+        if: github.event_name != 'pull_request'
         env:
           COSIGN_EXPERIMENTAL: "1"
         run: |
           IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}"
+          TAG="${{ env.DEFAULT_TAG }}"
 
-          echo "Signing pushed image..."
+          echo "Signing: $IMAGE:$TAG"
 
-          # Buildah/push step already gives us the final image reference
-          DIGEST=$(echo "${{ steps.push.outputs.digest }}")
-
-          if [ -z "$DIGEST" ]; then
-            echo "ERROR: No digest found from push step"
-            exit 1
-          fi
-
-          echo "Signing: $IMAGE@$DIGEST"
-          cosign sign --yes "$IMAGE@$DIGEST"
+          cosign sign --yes "$IMAGE:$TAG"
 

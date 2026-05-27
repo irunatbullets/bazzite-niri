@@ -115,24 +115,25 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: sigstore/cosign-installer@v4.1.2
         with:
           cosign-release: v2.6.3
 
       - name: Sign container image
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          IMAGE_BASE="${IMAGE_REGISTRY}/${IMAGE_NAME}${VARIANT}"
+          IMAGE_FULL="${IMAGE_REGISTRY}/${IMAGE_NAME}${VARIANT}"
 
-          echo '${{ steps.metadata.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
-            echo "Signing $tag"
-            cosign sign -y --key env://COSIGN_PRIVATE_KEY "$tag"
-          done
+          echo "Signing digest: ${DIGEST}"
+
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY \
+            "${IMAGE_FULL}@${DIGEST}"
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           VARIANT: ${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
+          DIGEST: ${{ steps.push.outputs.digest }}
 

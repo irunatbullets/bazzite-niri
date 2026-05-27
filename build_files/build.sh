@@ -2,15 +2,16 @@
 
 set -euxo pipefail
 
-### Install packages
+IMAGE_NAME="${IMAGE_NAME:-bazzite-niri}"
+IMAGE_VARIANT="${IMAGE_VARIANT:-}"
 
-# NOTE:
-# The following "important software" for niri are already installed with gnome
-# which comes with the bazzite-gnome base image:
-#
-# gnome-keyring
-# xdg-desktop-portal-gnome
-# xdg-desktop-portal-gtk
+if [ -z "$IMAGE_VARIANT" ]; then
+    FULL_NAME="$IMAGE_NAME"
+else
+    FULL_NAME="${IMAGE_NAME}-${IMAGE_VARIANT}"
+fi
+
+IMAGE_REF="ostree-image-signed:docker://ghcr.io/irunatbullets/${FULL_NAME}"
 
 dnf5 -y install         \
     alacritty           \
@@ -28,18 +29,14 @@ dnf5 -y install         \
     wlogout             \
     xfce-polkit
 
-### Build fresh copies of wifitui, bluetui, and xwayland-satellite
 dnf5 -y install rust cargo @development-tools dbus-devel xcb-util-cursor-devel clang git
-
 (
     export CARGO_HOME=/tmp/cargo
     export RUSTUP_HOME=/tmp/rustup
     export CARGO_INSTALL_ROOT=/usr
 
-    # Install wifitui and bluetui
     cargo install wifitui bluetui
 
-    # Build xwayland-satellite from specific commit
     cd /tmp
     git clone https://github.com/Supreeeme/xwayland-satellite.git
     cd xwayland-satellite
@@ -47,22 +44,24 @@ dnf5 -y install rust cargo @development-tools dbus-devel xcb-util-cursor-devel c
 
     cargo build --release
 
-    # Copy binary to same place as cargo install (/usr/bin)
     install -Dm755 target/release/xwayland-satellite /usr/bin/xwayland-satellite
 )
-
-### Clean up build artifacts and dev packages
 rm -rf /tmp/cargo /tmp/rustup /tmp/xwayland-satellite
 dnf5 -y remove rust cargo @development-tools dbus-devel xcb-util-cursor-devel clang git
-
-### Copr install example (in case I forget)
-#dnf5 -y copr enable blah/blah
-#dnf5 -y install blah
-#dnf5 -y copr disable blah/blah
-
-### System Unit Files
 
 systemctl enable podman.socket
 systemctl --global add-wants niri.service mako.service
 systemctl --global add-wants niri.service swayidle.service
+
+jq \
+    --arg name "$FULL_NAME" \
+    --arg ref "$IMAGE_REF" \
+    --arg tag "${IMAGE_VARIANT:-latest}" \
+    '
+    .["image-name"]=$name |
+    .["image-ref"]=$ref |
+    .["image-tag"]=$tag
+    ' \
+    /usr/share/ublue-os/image-info.json \
+    > /tmp/image-info.json && mv /tmp/image-info.json /usr/share/ublue-os/image-info.json
 

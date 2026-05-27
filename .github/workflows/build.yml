@@ -3,23 +3,21 @@ name: Build container image
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
   schedule:
     - cron: '05 10 * * *'
 
   push:
-    branches:
-      - main
+    branches: [main]
     paths-ignore:
       - '**/README.md'
 
   workflow_dispatch:
 
 env:
-  IMAGE_DESC: "My Customized Universal Blue Image"
-  IMAGE_KEYWORDS: "bootc,ublue,universal-blue"
+  IMAGE_DESC: "My Customized Universal Blue Image mashup featuring Bazzite, niri, waybar, fuzzel, etc"
+  IMAGE_KEYWORDS: "bootc,ublue,universal-blue,bazzite,niri,waybar,fuzzel"
   IMAGE_LOGO_URL: "https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
@@ -33,6 +31,16 @@ jobs:
   build_push:
     name: Build and push image
     runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - variant: ""
+            base_image: "ghcr.io/ublue-os/bazzite-gnome:stable"
+          - variant: "nvidia"
+            base_image: "ghcr.io/ublue-os/bazzite-gnome-nvidia:stable"
 
     permissions:
       contents: read
@@ -60,11 +68,11 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v6
         with:
-          images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
           tags: |
             type=raw,value=${{ env.DEFAULT_TAG }}
-            type=raw,value=${{ env.DEFAULT_TAG }}.${{ steps.date.outputs.date }}
-            type=raw,value=${{ steps.date.outputs.date }}
+            type=raw,value=${{ env.DEFAULT_TAG }}.{{date 'YYYYMMDD'}}
+            type=raw,value={{date 'YYYYMMDD'}}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -73,16 +81,19 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
-            org.opencontainers.image.version=${{ env.DEFAULT_TAG }}
+            org.opencontainers.image.version=${{ env.DEFAULT_TAG }}.{{date 'YYYYMMDD'}}
 
       - name: Build Image
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: ./Containerfile
-          image: ${{ env.IMAGE_NAME }}
+          image: ${{ env.IMAGE_NAME }}${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
+          oci: false
 
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
@@ -98,7 +109,7 @@ jobs:
         id: push
         with:
           registry: ${{ env.IMAGE_REGISTRY }}
-          image: ${{ env.IMAGE_NAME }}
+          image: ${{ env.IMAGE_NAME }}${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
           tags: ${{ steps.metadata.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -107,22 +118,19 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v4.1.2
         with:
-          cosign-release: v2.6.1
-
-      - name: Cosign login to GHCR
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
+          cosign-release: v2.6.3
 
       - name: Sign container image
         if: github.event_name != 'pull_request'
-        env:
-          COSIGN_EXPERIMENTAL: "1"
         run: |
-          IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}"
-          TAG="${{ env.DEFAULT_TAG }}"
+          IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}${VARIANT}"
 
-          echo "Signing: $IMAGE:$TAG"
-
-          cosign sign --yes "$IMAGE:$TAG"
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            cosign sign -y --key env://COSIGN_PRIVATE_KEY \
+              "${IMAGE_FULL}:${tag}"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          VARIANT: ${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
 

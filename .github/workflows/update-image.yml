@@ -1,9 +1,13 @@
 ---
-name: Build container image
+name: Update image
 
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**/README.md"
+      - ".github/bazzite-digests"
+      - ".github/workflows/**"
 
   schedule:
     - cron: '05 10 * * *'
@@ -11,9 +15,17 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '**/README.md'
+      - "**/README.md"
+      - ".github/bazzite-digests"
+      - ".github/workflows/**"
 
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force rebuild"
+        required: false
+        default: false
+        type: boolean
 
 env:
   IMAGE_DESC: "My Customized Universal Blue Image mashup featuring Bazzite, niri, waybar, fuzzel, etc"
@@ -27,9 +39,71 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+
 jobs:
+
+  check_base_images:
+    name: Check for new base images
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+      standard: ${{ steps.check.outputs.standard }}
+      nvidia: ${{ steps.check.outputs.nvidia }}
+      nouveau: ${{ steps.check.outputs.nouveau }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo jq
+
+      - name: Check digests
+        id: check
+        run: |
+          mkdir -p .github
+
+          STANDARD=$(skopeo inspect docker://ghcr.io/ublue-os/bazzite-gnome:stable | jq -r .Digest)
+          NVIDIA=$(skopeo inspect docker://ghcr.io/ublue-os/bazzite-gnome-nvidia-open:stable | jq -r .Digest)
+          NOUVEAU=$(skopeo inspect docker://ghcr.io/ublue-os/bazzite-gnome-nvidia:stable | jq -r .Digest)
+
+          OLD_STANDARD=$(grep '^standard=' .github/bazzite-digests | cut -d= -f2 || true)
+          OLD_NVIDIA=$(grep '^nvidia=' .github/bazzite-digests | cut -d= -f2 || true)
+          OLD_NOUVEAU=$(grep '^nouveau=' .github/bazzite-digests | cut -d= -f2 || true)
+
+          if [ "$STANDARD" != "$OLD_STANDARD" ] || \
+             [ "$NVIDIA" != "$OLD_NVIDIA" ] || \
+             [ "$NOUVEAU" != "$OLD_NOUVEAU" ]; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "standard=$STANDARD" >> "$GITHUB_OUTPUT"
+          echo "nvidia=$NVIDIA" >> "$GITHUB_OUTPUT"
+          echo "nouveau=$NOUVEAU" >> "$GITHUB_OUTPUT"
+
+
   build_push:
     name: Build and push image
+
+    needs: check_base_images
+
+    if: |
+      always() &&
+      (
+        github.event_name != 'schedule' ||
+        needs.check_base_images.outputs.changed == 'true' ||
+        github.event.inputs.force == 'true'
+      )
+
     runs-on: ubuntu-24.04
 
     strategy:
@@ -39,8 +113,12 @@ jobs:
         include:
           - variant: ""
             base_image: "ghcr.io/ublue-os/bazzite-gnome:stable"
+
           - variant: "nvidia"
             base_image: "ghcr.io/ublue-os/bazzite-gnome-nvidia-open:stable"
+
+          - variant: "nouveau"
+            base_image: "ghcr.io/ublue-os/bazzite-gnome-nvidia:stable"
 
     permissions:
       contents: read
@@ -48,8 +126,9 @@ jobs:
       id-token: write
 
     steps:
+
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Prepare environment
         run: |
@@ -85,7 +164,7 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           containerfiles: ./Containerfile
           image: ${{ env.IMAGE_NAME }}${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
@@ -97,7 +176,7 @@ jobs:
 
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -105,8 +184,8 @@ jobs:
 
       - name: Push To GHCR
         if: github.event_name != 'pull_request'
-        uses: redhat-actions/push-to-registry@v2
         id: push
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ env.IMAGE_REGISTRY }}
           image: ${{ env.IMAGE_NAME }}${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
@@ -136,4 +215,42 @@ jobs:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           VARIANT: ${{ matrix.variant && format('-{0}', matrix.variant) || '' }}
           DIGEST: ${{ steps.push.outputs.digest }}
+
+
+  update_bazzite_digests:
+    name: Update base image digests
+
+    needs:
+      - check_base_images
+      - build_push
+
+    if: |
+      always() &&
+      needs.build_push.result == 'success' &&
+      needs.check_base_images.outputs.changed == 'true'
+
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Save new digests
+        run: |
+          printf "standard=%s\nnvidia=%s\nnouveau=%s\n" \
+            "${{ needs.check_base_images.outputs.standard }}" \
+            "${{ needs.check_base_images.outputs.nvidia }}" \
+            "${{ needs.check_base_images.outputs.nouveau }}" \
+            > .github/bazzite-digests
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add .github/bazzite-digests
+          git commit -m "Update Bazzite base image digests"
+          git push
 
